@@ -134,11 +134,18 @@ endforeach()
 
 ### Installation (https://github.com/forexample/package-example) {
 
-set(config_install_dir "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
+option(EXPORT_AS_JPEG "Export CMake targets as the original JPEG library" OFF)
+
+set(EXPORT_PROJECT_NAME ${PROJECT_NAME})
+if(EXPORT_AS_JPEG)
+  set(EXPORT_PROJECT_NAME "JPEG")
+endif()
+
+set(config_install_dir "${CMAKE_INSTALL_LIBDIR}/cmake/${EXPORT_PROJECT_NAME}")
 set(generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
-set(project_config "${generated_dir}/${PROJECT_NAME}Config.cmake")
-set(TARGETS_EXPORT_NAME "${PROJECT_NAME}Targets")
-set(NAMESPACE "${PROJECT_NAME}::")
+set(project_config "${generated_dir}/${EXPORT_PROJECT_NAME}Config.cmake")
+set(TARGETS_EXPORT_NAME "${EXPORT_PROJECT_NAME}Targets")
+set(NAMESPACE "${EXPORT_PROJECT_NAME}::")
 
 include(CMakePackageConfigHelpers)
 
@@ -642,21 +649,27 @@ if(WITH_TURBOJPEG)
   endif()
 
   if(ENABLE_STATIC)
-    add_library(turbojpeg-static STATIC ${JPEG_SOURCES} $<TARGET_OBJECTS:simd>
+    if(EXPORT_AS_JPEG)
+      set(TURBOJPEG_STATIC_LIB_NAME turbojpeg-static)
+    else()
+      set(TURBOJPEG_STATIC_LIB_NAME jpeg)
+    endif()
+
+    add_library(${TURBOJPEG_STATIC_LIB_NAME} STATIC ${JPEG_SOURCES} $<TARGET_OBJECTS:simd>
       ${SIMD_OBJS} turbojpeg.c transupp.c jdatadst-tj.c jdatasrc-tj.c rdbmp.c
       rdppm.c wrbmp.c wrppm.c)
-    set_property(TARGET turbojpeg-static PROPERTY COMPILE_FLAGS
+    set_property(TARGET ${TURBOJPEG_STATIC_LIB_NAME} PROPERTY COMPILE_FLAGS
       "-DBMP_SUPPORTED -DPPM_SUPPORTED")
     if(NOT MSVC)
-      set_target_properties(turbojpeg-static PROPERTIES OUTPUT_NAME turbojpeg)
+      set_target_properties(${TURBOJPEG_STATIC_LIB_NAME} PROPERTIES OUTPUT_NAME turbojpeg)
     endif()
 
     add_executable(tjunittest-static tjunittest.c tjutil.c md5/md5.c
       md5/md5hl.c)
-    target_link_libraries(tjunittest-static turbojpeg-static)
+    target_link_libraries(tjunittest-static ${TURBOJPEG_STATIC_LIB_NAME})
 
     add_executable(tjbench-static tjbench.c tjutil.c)
-    target_link_libraries(tjbench-static turbojpeg-static)
+    target_link_libraries(tjbench-static ${TURBOJPEG_STATIC_LIB_NAME})
     if(UNIX)
       target_link_libraries(tjbench-static m)
     endif()
@@ -1385,7 +1398,7 @@ if(WITH_TURBOJPEG)
     endif()
   endif()
   if(ENABLE_STATIC)
-    install(TARGETS turbojpeg-static
+    install(TARGETS ${TURBOJPEG_STATIC_LIB_NAME}
       EXPORT "${TARGETS_EXPORT_NAME}"
       ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
       INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
