@@ -595,9 +595,9 @@ endif()
 
 if(ENABLE_STATIC)
   if(EXPORT_AS_JPEG)
-    set(JPEG_STATIC_LIB_NAME jpeg-static)
-  else()
     set(JPEG_STATIC_LIB_NAME jpeg)
+  else()
+    set(JPEG_STATIC_LIB_NAME jpeg-static)
   endif()
 
   add_library(${JPEG_STATIC_LIB_NAME} STATIC ${JPEG_SOURCES} $<TARGET_OBJECTS:simd>
