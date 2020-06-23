@@ -40,6 +40,7 @@ endif()
 
 hunter_add_package(NASM)
 find_program(NASM_EXECUTABLE nasm HINTS ${NASM_ROOT}/bin NO_DEFAULT_PATH)
+set(CMAKE_ASM_NASM_COMPILER "${NASM_EXECUTABLE}")
 
 enable_language(ASM_NASM)
 message(STATUS "CMAKE_ASM_NASM_COMPILER = ${CMAKE_ASM_NASM_COMPILER}")
