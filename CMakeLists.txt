@@ -45,6 +45,9 @@ message(STATUS "CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
 message(STATUS "VERSION = ${VERSION}, BUILD = ${BUILD}")
 
 # Detect CPU type and whether we're building 64-bit or 32-bit code
+if(IOS)
+  set(CMAKE_SIZEOF_VOID_P 4)
+endif()
 math(EXPR BITS "${CMAKE_SIZEOF_VOID_P} * 8")
 string(TOLOWER ${CMAKE_SYSTEM_PROCESSOR} CMAKE_SYSTEM_PROCESSOR_LC)
 if(CMAKE_SYSTEM_PROCESSOR_LC MATCHES "x86_64" OR
